@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.ucuenca.hadoopexamples.fifth;
+package edu.ucuenca.hadoopexamples.second;
 
-import edu.ucuenca.hadoopexamples.second.MaxTemperature;
-import edu.ucuenca.hadoopexamples.second.MaxTemperatureMapper;
-import edu.ucuenca.hadoopexamples.second.MaxTemperatureReducer;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.compress.GzipCodec;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -30,30 +26,31 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  *
  * @author Xavier Sumba <xavier.sumba93@ucuenca.ec>
  */
-public class MaxTemperatureWithCompression {
-    
+public class MaxTemperature {
+
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("Usage: MaxTemperatureWithCompression <input path> <output path>");
+            System.err.println("Usage: MaxTemperature <input path> <output path>");
             System.exit(-1);
         }
-        
+
         Job job = new Job();
         job.setJarByClass(MaxTemperature.class);
-        
+        job.setJobName("Max temperature");
+
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        
+
+        job.setMapperClass(MaxTemperatureMapper.class);
+        job.setReducerClass(MaxTemperatureReducer.class);
+
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        
-        FileOutputFormat.setCompressOutput(job, true);
-        FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
-        
-        job.setMapperClass(MaxTemperatureMapper.class);
-        job.setCombinerClass(MaxTemperatureReducer.class);
-        job.setReducerClass(MaxTemperatureReducer.class);
-        
+
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
+
 }
